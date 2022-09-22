@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import classes from'./Form.module.css';
 import Card from "../UI/Card";
 import Button from "../UI/Button";
@@ -6,37 +6,36 @@ import ErrorMadal from "../UI/ErrorModal";
 import Wrapper from "../helpers/Wrapper";
 
 const Form = (props) => {
-    const [enterduserValue, setEnteredUserValue] = useState('');
-    const [enterdAgeValue, setEnteredAgeValue] = useState('');
+    const nameInputRef = useRef();
+    const ageInputRef = useRef();
+    const collegeInputRef = useRef();
+
     const [error, setError] = useState();
     
     const formHandler = (event) => {
         event.preventDefault();
-        if(enterduserValue.trim().length === 0 || enterdAgeValue.trim().length === 0){
+        const enteredName = nameInputRef.current.value;
+        const enteredAge = ageInputRef.current.value;
+        const enteredCollege = collegeInputRef.current.value;
+
+        if(enteredName.trim().length === 0 || enteredAge.trim().length === 0 || enteredCollege.trim().length === 0){
             setError({
                 title: 'Invalid input',
                 message: 'Enter valid inputs'
             })
             return;
         }
-        if(+enterdAgeValue < 1 ){
+        if(+enteredAge < 1 ){
             setError({
                 title: 'Invalid Age',
                 message: 'Please enter valid age ( > 0 )'
             })
             return;
         }
-        props.onAddUser(enterduserValue, enterdAgeValue);
-        setEnteredUserValue('');
-        setEnteredAgeValue('');
-    };
-
-    const userNameInputHandler = (event) => {
-        setEnteredUserValue (event.target.value);
-    };
-
-    const userAgeInputHandler = (event) => {
-        setEnteredAgeValue (event.target.value);
+        props.onAddUser(enteredName, enteredAge, enteredCollege);
+        nameInputRef.current.value = '';
+        ageInputRef.current.value = '';
+        collegeInputRef.current.value = '';
     };
 
     const errorHandler = () => {
@@ -45,13 +44,22 @@ const Form = (props) => {
 
     return (
         <Wrapper>
-            {error && (<ErrorMadal title={error.title} message={error.message} onConfirm={errorHandler}/>)}
+            {error && (<ErrorMadal 
+                title={error.title}
+                message={error.message} 
+                onConfirm={errorHandler}
+            />)}
             <Card className={classes.input}>
                 <form onSubmit={formHandler}>
                     <label htmlFor="username">User Name</label>
-                    <input id='username' type='text'value={enterduserValue} onChange={userNameInputHandler} />
+                    <input id='username' type='text'
+                        ref={nameInputRef} />
                     <label htmlFor="age">Age (Years)</label>
-                    <input id="age" type='number' value={enterdAgeValue} onChange={userAgeInputHandler} />
+                    <input id="age" type='number'
+                        ref={ageInputRef}/>
+                    <label htmlFor="college">College Name</label>
+                    <input id="college" type='text'
+                        ref={collegeInputRef}/>
                     <Button type="submit">Add User</Button>
                 </form>
             </Card>
